@@ -1,4 +1,4 @@
-import { random } from "./utils"
+import { random, round } from "./utils"
 
 const MAX_CSIZE = 1200
 const MAX_PARTICLE_AMOUNT = 10000
@@ -28,20 +28,20 @@ function genFeatures() {
     dark,
     thready: random() < 0.5,
     // 0~1 -> 100~133, 350~450
-    rotation: Math.floor(random(0.778, 1)*10000)/10000,
+    rotation: round(random(0.778, 1)),
     // 0~1 -> 2800~3200, 8000~10000
-    mindStability: Math.floor(random(0.8, 1)*10000)/10000,
+    mindStability: round(random(0.8, 1)),
     // 0~1 -> 15~20, 32~50,
-    mindOffset: random(0.64, 1),
+    mindOffset: round(random(0.64, 1)),
   }
   let isSpecialType = !dark && random() < 0.2
   if (isSpecialType) {
     features = {
       ...features,
       dark: false,
-      rotation: random(0.3, 0.4),
-      mindStability: random(0.22, 0.25),
-      mindOffset: random(0.4, 0.5),
+      rotation: round(random(0.3, 0.4)),
+      mindStability: round(random(0.22, 0.25)),
+      mindOffset: round(random(0.4, 0.5)),
     }
   }
   return features
@@ -49,7 +49,6 @@ function genFeatures() {
 
 function preload() {
   window.$fxhashFeatures = $feat = genFeatures()
-  console.log(window.$fxhashFeatures)
 }
 
 function setup(p5) {

@@ -26,3 +26,7 @@ export const random = (arg1, arg2) => {
   }
   console.error(`[Random]: Incorrect parameters`)
 }
+
+export const round = (n, decimal = 5) => {
+  return Math.round(n * Math.pow(10, decimal)) / Math.pow(10, decimal)
+}
