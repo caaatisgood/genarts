@@ -54,6 +54,7 @@ function setup(p5) {
   let csize = p5.min(p5.windowWidth, p5.windowHeight, MAX_CSIZE)
   p5.createCanvas(csize, csize);
   p5.pixelDensity(2)
+  p5.noiseSeed(random())
 
   let thready = $feat.thready
   dark = $feat.dark
