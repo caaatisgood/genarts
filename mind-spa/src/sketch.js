@@ -3,7 +3,7 @@ import { random, round } from "./utils"
 const MAX_CSIZE = 1200
 const MAX_PARTICLE_AMOUNT = 10000
 const MAX_ROTATION = 450
-const MAX_MIND_OFFSET = 50
+const MAX_MIND_OFFSET = 45
 const MAX_START_NOISE = 50
 const COLOR_SETS = {
   LIGHT: { bg: "#eee", mind: "#1B1C1D" },
@@ -31,16 +31,15 @@ function genFeatures() {
     rotation: round(random(0.778, 1)),
     // 0~1 -> 2800~3200, 8000~10000
     mindStability: round(random(0.8, 1)),
-    // 0~1 -> 15~20, 32~50,
+    // 0~1 -> 15~20, 29~45,
     mindOffset: round(random(0.64, 1)),
   }
-  let isSpecialType = !dark && random() < 0.2
+  let isSpecialType = random() < 0.125
   if (isSpecialType) {
     features = {
       ...features,
-      dark: false,
-      rotation: round(random(0.3, 0.4)),
-      mindStability: round(random(0.22, 0.25)),
+      rotation: round(random(0.15, 0.2)),
+      mindStability: round(random(0.15, 0.2)),
       mindOffset: round(random(0.4, 0.5)),
     }
   }
@@ -55,7 +54,6 @@ function setup(p5) {
   let csize = p5.min(p5.windowWidth, p5.windowHeight, MAX_CSIZE)
   p5.createCanvas(csize, csize);
   p5.pixelDensity(2)
-  p5.noiseSeed(random(1, 100000))
 
   let thready = $feat.thready
   dark = $feat.dark
@@ -76,7 +74,7 @@ function setup(p5) {
   yoffset = csize * random(0.34, 0.42)
   let [yOffStart, yOffEnd] = [
     yoffset,
-    yoffset*0.15,
+    yoffset*round(random(0.13, 0.18)),
   ]
   maxStartNoise = random(0, MAX_START_NOISE)
 
@@ -130,7 +128,11 @@ function setup(p5) {
       let sandClr
       if (random() < 0.002) {
         sandClr = p5.color(clrs.mind)
-        sandClr.setAlpha(p5.lerp(90, 120, pg))
+        sandClr.setAlpha(
+          thready
+            ? p5.lerp(90, 120, pg)
+            : p5.lerp(45, 90, pg)
+        )
         p5.fill(sandClr)
         p5.ellipse(
           0,
@@ -139,7 +141,11 @@ function setup(p5) {
         )
       } else {
         sandClr = p5.color(clrs.mind)
-        sandClr.setAlpha(p5.lerp(7, 70, pg))
+        sandClr.setAlpha(
+          thready
+            ? p5.lerp(7, 70, pg)
+            : p5.lerp(4, 45, pg)
+        )
         p5.fill(sandClr)
         p5.ellipse(
           random(yoffset * -0.3, yoffset * 0.3),
