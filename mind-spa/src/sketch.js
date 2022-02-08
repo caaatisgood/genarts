@@ -157,6 +157,7 @@ function setup(p5) {
     p5.pop()
   }
   p5.noLoop()
+  fxpreview()
 }
 
 function draw() {}
