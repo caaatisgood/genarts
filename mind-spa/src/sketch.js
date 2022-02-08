@@ -34,7 +34,7 @@ function genFeatures() {
     // 0~1 -> 15~20, 29~45,
     mindOffset: round(random(0.64, 1)),
   }
-  let isSpecialType = random() < 0.125
+  let isSpecialType = random() < 0.1
   if (isSpecialType) {
     features = {
       ...features,
