@@ -1,90 +1,16 @@
 import { random } from "./utils"
 
-let cwidth = 900
-let cheight = cwidth*0.6
+let cwidth
+let cheight
 let bg = 200
 let prtclStreams = []
 let pillarCords
 let globalCords = {}
 
-let generateSketchyLineCords, randomVec
-
 export function setup() {
-  class ParticleStream {
-    constructor({ idx }) {
-      let def = {
-        idx,
-        initx: 35,
-        inity: idx*10,
-        prtcls: [],
-        direction: 'to-left',
-        clockwise: true,
-      }
-      Object.assign(this, def)
-    }
-    
-    update() {
-      let particleMax = 50
-      if (this.prtcls.length === particleMax) {
-        this.prtcls.pop()
-      }
-      this.prtcls.forEach((prtcl, index) => {
-        // let deltax = 1 + (noise(frameCount/50, this.idx, index + 10) - 0.5) * 10
-        // let deltay = 1 + (noise(frameCount/50, this.idx, index + 100) - 0.5) * 10
-        let x = sin((frameCount+index)/150)
-        let y = -cos((frameCount+index)/150)
-        let yNoise = (noise(frameCount/100 + index/10) - 0.5)*2
-        prtcl.v.set(x, y + yNoise)
-        // prtcl.v.add([deltax, deltay])
-      })
-      if (this.prtcls.length < particleMax) {
-        this.prtcls.unshift({
-          randSeed: random(0, 50),
-          v: createVector(this.initx, this.inity)
-        })
-      }
-    }
-    
-    draw() {
-      push()
-        noStroke()
-        ellipseMode(CENTER)
-        let clr = color("darkblue")
-        clr.setAlpha(100)
-        fill(clr)
-        this.prtcls.forEach((p) => {
-          let x = p.v.x*100
-          let y = p.v.y*20
-          if (this.direction === 'to-left' && this.clockwise) {
-            if (p.v.y < 0 && x > pillarCords.leftX && x < pillarCords.rightX) {
-              return
-            }
-          }
-          ellipse(x, y, 3)
-        })
-      pop()
-      push()
-      // this.prtcls.forEach((prtcl) => {
-      // 	fill("black")
-      // 	fill("white")
-      // 	noStroke()
-      // 	rect(295, 285, 55, 40)
-      // 	fill("black")
-      // 	text(
-      // 		`x: ${prtcl.v.x.toFixed(1)}`,
-      // 		300,
-      // 		300
-      // 	)
-      // 	text(
-      // 		`y: ${prtcl.v.y.toFixed(1)}`,
-      // 		300,
-      // 		320
-      // 	)
-      // })
-      pop()
-    }
-  }
-
+  // cwidth = windowWidth
+  cwidth = 1200
+  cheight = cwidth*0.6
   createCanvas(cwidth, cheight);
   background(bg);
   pillarCords = _getPillarCords()
@@ -93,52 +19,23 @@ export function setup() {
       new ParticleStream({ idx: i })
     )
   }
-
-  randomVec = (va, vb) => {
-    // kinda edge case
-    if (va.x === vb.x) {
-      let x = va.x
-      return createVector(x, random(va.y, vb.y))
-    } else if (va.y === vb.y) {
-      let y = va.y
-      return createVector(random(va.x, vb.x), y)
-    }
-    // general case
-    const x = random(va.x, vb.x)
-    const y = map(x, va.x, vb.x, va.y, vb.y)
-    return createVector(x, y)
-  }
-
-  generateSketchyLineCords = (va, vb, threads = 10) => {
-    let cords = []
-    for (let i=0; i<threads; i++) {
-      let startv = randomVec(va, vb)
-      let endv = randomVec(va, vb)
-      cords.push([
-        startv.x+random(-3, 3),
-        startv.y+random(-3, 3),
-        endv.x+random(-3, 3),
-        endv.y+random(-3, 3),
-      ])
-    }
-    return cords
-  }
+  push()
+    translate(width/2, height/2-80)
+    drawPillar3()
+  pop()
 }
 
 export function draw() {
-  background(bg)
+  // background(bg)
+  // push()
+  //   translate(width/2, height/2-80)
+  //   drawPillar3()
+  //   prtclStreams.forEach((p) => {
+  //     p.update()
+  //     p.draw()
+  //   })
+  // pop()
   // noLoop()
-  // drawBg()
-  push()
-    translate(width/2, height/2-80)
-    // drawPillar1()
-    // drawPillar2()
-    drawPillar3()
-    prtclStreams.forEach((p) => {
-      p.update()
-      p.draw()
-    })
-  pop()
 }
 
 const _getPillarCords = () => {
@@ -264,5 +161,110 @@ const drawPillar3 = () => {
         pop()
       })
     })
+  }
+}
+
+const randomVec = (va, vb) => {
+  // kinda edge case
+  if (va.x === vb.x) {
+    let x = va.x
+    return createVector(x, random(va.y, vb.y))
+  } else if (va.y === vb.y) {
+    let y = va.y
+    return createVector(random(va.x, vb.x), y)
+  }
+  // general case
+  const x = random(va.x, vb.x)
+  const y = map(x, va.x, vb.x, va.y, vb.y)
+  return createVector(x, y)
+}
+
+const generateSketchyLineCords = (va, vb, threads = 10) => {
+  let cords = []
+  for (let i=0; i<threads; i++) {
+    let startv = randomVec(va, vb)
+    let endv = randomVec(va, vb)
+    cords.push([
+      startv.x+random(-3, 3),
+      startv.y+random(-3, 3),
+      endv.x+random(-3, 3),
+      endv.y+random(-3, 3),
+    ])
+  }
+  return cords
+}
+
+class ParticleStream {
+  constructor({ idx }) {
+    let def = {
+      idx,
+      initx: 35,
+      inity: idx*10,
+      prtcls: [],
+      direction: 'to-left',
+      clockwise: true,
+    }
+    Object.assign(this, def)
+  }
+  
+  update() {
+    let particleMax = 50
+    if (this.prtcls.length === particleMax) {
+      this.prtcls.pop()
+    }
+    this.prtcls.forEach((prtcl, index) => {
+      // let deltax = 1 + (noise(frameCount/50, this.idx, index + 10) - 0.5) * 10
+      // let deltay = 1 + (noise(frameCount/50, this.idx, index + 100) - 0.5) * 10
+      let x = sin((frameCount+index)/150)
+      let y = -cos((frameCount+index)/150)
+      let yNoise = (noise(frameCount/100 + index/10) - 0.5)*2
+      prtcl.v.set(x, y + yNoise)
+      // prtcl.v.add([deltax, deltay])
+    })
+    if (this.prtcls.length < particleMax) {
+      this.prtcls.unshift({
+        randSeed: random(0, 50),
+        v: createVector(this.initx, this.inity)
+      })
+    }
+  }
+  
+  draw() {
+    push()
+      noStroke()
+      ellipseMode(CENTER)
+      let clr = color("darkblue")
+      clr.setAlpha(100)
+      fill(clr)
+      this.prtcls.forEach((p) => {
+        let x = p.v.x*100
+        let y = p.v.y*20
+        if (this.direction === 'to-left' && this.clockwise) {
+          if (p.v.y < 0 && x > pillarCords.leftX && x < pillarCords.rightX) {
+            return
+          }
+        }
+        ellipse(x, y, 3)
+      })
+    pop()
+    push()
+    // this.prtcls.forEach((prtcl) => {
+    // 	fill("black")
+    // 	fill("white")
+    // 	noStroke()
+    // 	rect(295, 285, 55, 40)
+    // 	fill("black")
+    // 	text(
+    // 		`x: ${prtcl.v.x.toFixed(1)}`,
+    // 		300,
+    // 		300
+    // 	)
+    // 	text(
+    // 		`y: ${prtcl.v.y.toFixed(1)}`,
+    // 		300,
+    // 		320
+    // 	)
+    // })
+    pop()
   }
 }

@@ -96,7 +96,7 @@ function setup(p5) {
         let yStart = (startNoise - 0.5) * noiseVol
         let endNoise = p5.noise(p/150, i/60)
         let yEnd = (endNoise - 0.5) * noiseVol
-        drawLine({ yStart, yEnd, yoffset, pg, alphaRange: lineAlphaRange })
+        // drawLine({ yStart, yEnd, yoffset, pg, alphaRange: lineAlphaRange })
         drawSand({ yStart, yEnd, yoffset, pg })
       p5.pop()
     }
@@ -153,6 +153,15 @@ function setup(p5) {
           yoffset + random(yStart*0.66, yEnd*1.2),
           strokew,
         )
+        p5.push()
+          p5.noStroke()
+          // let clr = p5.color("red")
+          // clr.setAlpha(255)
+          p5.fill("red")
+          p5.ellipse(yoffset, yoffset + yStart, 0.4)
+          p5.fill("blue")
+          p5.ellipse(yoffset, yoffset + yEnd, 0.4)
+        p5.pop()
       }
     p5.pop()
   }
@@ -170,7 +179,7 @@ const sketch = (p5) => {
     const dateTime = (
       new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
     ).split(" ").join("-")
-    p5.save(`mind-spa-${dateTime}`)
+    // p5.save(`mind-spa-${dateTime}`)
   }
 }
 
