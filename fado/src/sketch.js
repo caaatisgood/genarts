@@ -1,5 +1,7 @@
 import { random } from "./utils"
 
+let clr1, clr2
+
 let cwidth
 let cheight
 let bg = 200
@@ -9,24 +11,65 @@ let globalCords = {}
 
 export function setup() {
   // cwidth = windowWidth
-  cwidth = 1200
+  cwidth = 900
   cheight = cwidth*0.6
   createCanvas(cwidth, cheight);
   background(bg);
+  // frameRate(1)
   pillarCords = _getPillarCords()
   for (let i=0; i<1; i++) {
     prtclStreams.push(
       new ParticleStream({ idx: i })
     )
   }
-  push()
-    translate(width/2, height/2-80)
-    drawPillar3()
-  pop()
+  // clr1 = color("#f18f01")
+  clr1 = color("#db504a")
+  clr2 = color("#006e90")
 }
 
 export function draw() {
-  // background(bg)
+  background(bg)
+  push()
+    translate(width/2, height/2-80)
+    // drawPillar3()
+  pop()
+  push()
+    translate(width/2, height/2)
+    let layers = 10
+    for (let layer=0; layer<layers; layer++) {
+      let baseY = lerp(-height/2, height/2, (layer+1)/(layers+1))
+      let threads = 3 + layer * 3
+      let layerPg = layer/layers
+      for (let i = 0; i < threads; i++) {
+        let pg = 0
+        let ticks = 300
+        while (pg < 1) {
+          let tick = pg * ticks
+          let x = lerp(-width/2*1.05, width/2*1.05, pg)
+          let noiseVol = lerp(133, 466, layerPg)
+          let startNoise = noise(
+            (layer*20+tick+lerp(200, 0, pg))/150,
+            i/20,
+            frameCount/20,
+          )
+          let yStart = (startNoise - 0.5) * noiseVol
+          let endNoise = noise((layer*20+tick)/150, i/40, frameCount/40)
+          // let endNoise = sin((layer*20+tick)/150+i/40, frameCount/40)
+          let yEnd = (endNoise - 0.5) * noiseVol
+          let xOffset = lerp(-10, 20, layerPg)
+          let clr = lerpColor(clr1, clr2, layerPg)
+          clr.setAlpha(100)
+          stroke(clr)
+          strokeWeight(0.3)
+          line(
+            x, baseY + yStart,
+            x+xOffset, baseY + yEnd,
+          )
+          pg+=1/ticks
+        }
+      }
+    }
+  pop()
   // push()
   //   translate(width/2, height/2-80)
   //   drawPillar3()

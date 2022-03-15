@@ -82,7 +82,7 @@ function setup(p5) {
   p5.background(clrs.bg);
   p5.translate(p5.width/2, p5.height/2)
 
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 10; i++) {
     for (let p = 1; p < pAmount; p++) {
       let pg = p/pAmount
       p5.push()
@@ -96,7 +96,7 @@ function setup(p5) {
         let yStart = (startNoise - 0.5) * noiseVol
         let endNoise = p5.noise(p/150, i/60)
         let yEnd = (endNoise - 0.5) * noiseVol
-        // drawLine({ yStart, yEnd, yoffset, pg, alphaRange: lineAlphaRange })
+        drawLine({ yStart, yEnd, yoffset, pg, alphaRange: lineAlphaRange })
         drawSand({ yStart, yEnd, yoffset, pg })
       p5.pop()
     }
