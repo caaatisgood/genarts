@@ -44,37 +44,47 @@ export function draw() {
   pop()
   push()
     translate(width/2, height/2)
-    let layers = 13
+    let layers = 1
     for (let layer=0; layer<layers; layer++) {
       let margin = 1
       let baseY = lerp(-height/2*margin, height/2*margin, (layer+1)/(layers+1))
-      let threads = 3 + layer * 3
+      let threads = 5
       let layerPg = layer/layers
       for (let i = 0; i < threads; i++) {
         let pg = 0
         let ticks = 500
         while (pg < 1) {
           let tick = pg * ticks
-          let x = lerp(-width/2*1.05, width/2*1.05, pg)
-          let noiseVol = lerp(133, 466, layerPg)
-          let startNoise = noise(
-            (layer*30+tick+lerp(200, 0, pg))/150,
+          let x = lerp(-width/3, width/3, pg)
+          let noiseVol = lerp(100, 300, layerPg)
+          let noiseBase = sin(i/5+frameCount/100)*0.2
+          // noiseBase = 0
+          let startNoise = noiseBase + noise(
+            (layer*30+tick+lerp(200, 0, pg))/120,
             i/20,
-            frameCount/20,
-          )
-          let yStart = (startNoise - 0.5) * noiseVol
-          let endNoise = noise((layer*30+tick)/150, i/40, frameCount/40)
+            frameCount/50,
+          ) - 0.5
+          let yStart = startNoise * noiseVol
+          let endNoise = noiseBase + noise((layer*30+tick)/150, i/40, frameCount/50)
           // let endNoise = sin((layer*20+tick)/150+i/40, frameCount/40)
           let yEnd = (endNoise - 0.5) * noiseVol
           let xOffset = lerp(-10, 20, layerPg)
           let clr = lerpColor(clr1, clr2, layerPg)
-          clr.setAlpha(40)
-          stroke(clr)
-          strokeWeight(0.3)
-          line(
-            x, baseY + yStart,
-            x+xOffset, baseY + yEnd,
-          )
+          // clr.setAlpha(40)
+          for (let k=0; k<1; k++) {
+            fill(clr)
+            noStroke()
+            ellipse(
+              x, baseY + random(yStart, yEnd),
+              1
+            )
+          }
+          // stroke(clr)
+          // strokeWeight(0.3)
+          // line(
+          //   x, baseY + yStart,
+          //   x+xOffset, baseY + yEnd,
+          // )
           pg+=1/ticks
         }
       }
@@ -88,7 +98,7 @@ export function draw() {
   //     p.draw()
   //   })
   // pop()
-  // noLoop()
+  noLoop()
 }
 
 const _getPillarCords = () => {
@@ -326,5 +336,5 @@ export function mousePressed() {
   const dateTime = (
     new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
   ).split(" ").join("-")
-  save(`some-flow-${dateTime}`)
+  // save(`some-flow-${dateTime}`)
 }
