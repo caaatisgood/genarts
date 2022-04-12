@@ -1,11 +1,14 @@
+let cwidth = 700
+let cheight = cwidth
+
 let streams = []
 let pg = 0
 
 export function setup() {
-  pixelDensity(2)
-  createCanvas(windowWidth, windowHeight);
+  pixelDensity(3)
+  createCanvas(cwidth, cheight);
 	background("darksalmon");
-  let streamsAmt = 20
+  let streamsAmt = 25
   for (let i = 0; i<streamsAmt; i++) {
     streams.push(
       new Stream({
@@ -31,6 +34,10 @@ class Stream {
       startv: _cv.copy(),
       rot: 0,
       speed: random(0.2, 0.5),
+      size: random([
+        [0.5, 3],
+        [3, 6],
+      ])
 		}
     // construct streaming cords
 		Object.assign(this, def)
@@ -46,13 +53,10 @@ class Stream {
      */
   
     /* flowing based on progress */
-    let y_force_scale = 3
-    let _pg = round(pg, 10)
-    // let _pg = pg
-    let nextNoise = noise(idx+pg) - 0.5
-    // let nextNoise = _nextNoise*sin(idx/10+pg)
+    let y_force_scale = 2
+    let nextNoise = noise(idx*2+pg) - 0.5
     let yDelta = nextNoise * y_force_scale
-    let xDelta = speed * pg * width/(10+noise(frameCount/200+idx)*2)
+    let xDelta = speed * pg * width/(18+noise(frameCount/200+idx)*2)
     let deltaVector = createVector(xDelta, yDelta)
     let dvHeading = deltaVector.heading()
     this.rot = dvHeading
@@ -88,7 +92,7 @@ class Stream {
 	}
 	
 	draw() {
-    let { cv, rot } = this
+    let { cv, rot, size } = this
     push()
       translate(cv.x, cv.y)
       rotate(frameCount/20+this.idx)
@@ -98,7 +102,8 @@ class Stream {
       let clr = color("white")
       clr.setAlpha(100)
       fill(clr)
-      rect(0, 0, 5, 2, 10)
+      let [rectW, rectH] = size
+      rect(0, 0, rectW, rectH, 10)
     pop()
 	}
 }
