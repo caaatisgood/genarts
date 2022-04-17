@@ -5,63 +5,107 @@ let clrs
 let cwidth = 700
 let cheight = cwidth
 let streams = []
-// let pg = 0
-// let deviceMotionHandler = (evt) => {
-//   if (!evt?.accelerationIncludingGravity) {
-//     return
-//   }
-//   let acc = evt.accelerationIncludingGravity
-//   pg = map(acc.x, -5, 5, 0, 1, true)
-// }
+let pg = 0
+let bg = "#edf6f9"
+	
+/*
+------------------------------------------------------------
+0                  [-------------]
+1                [-------------]
+2              [-------------]
+3            [-------------]
+4          [-------------]
+5        [-------------]
+6      [-------------]
+7    [-------------]
+8  [-------------]
+9...
+*/
 
 export function setup() {
   cheight = cwidth = min(windowWidth, windowHeight)
-  // createCanvas(cwidth, cheight);
-
   createCanvas(windowWidth, windowHeight);
-	background("#edf6f9");
+	background(bg);
   drawingContext.shadowBlur = 5;
-  // drawingContext.shadowColor = 'white';
-	// background(0);
   clrs = random(clrStrs).split("/").pop().split("-").map(s => "#"+s)
-  let streamsAmt = 80
+  let streamsAmt = 20
   for (let i = 0; i<streamsAmt; i++) {
     streams.push(
       new Stream({
         idx: i,
         // x: width/2 + noise(i*10, i) * map(noise(i/10, i), 0, 1, 0, 10),
         // y: height/2 + noise(i*20, i) * map(noise(i/10, i), 0, 1, 0, 10),
-        initX: width/2 + sin(i/3)*20-30,
-        initY: height/2 + cos(i/2)*20-50,
+        particleConfig: {
+          initX: width/2 + sin(i/3)*10-30,
+          initY: height/2 + cos(i/2)*10-50,
+        },
       })
     )
   }
 }
 
+const STREAM_LENGTH = 30 // particle amount
 class Stream {
-	constructor({ idx, initX = width/2, initY = height/2 } = {}) {
-		let def = {
+  constructor({ idx, particleConfig } = {}) {
+    let particles = []
+    for (let i = 0; i < STREAM_LENGTH; i++) {
+      let pgOffset = i/(STREAM_LENGTH-1) // 0~1
+      particles.push(
+        new Particle({
+          streamIdx: idx,
+          pgOffset,
+          idx: i,
+          ...particleConfig
+        })
+      )
+    }
+    let def = {
       idx,
-      pgOffset: 0,
+      particles,
+    }
+    Object.assign(this, def)
+  }
+
+  draw() {
+    this.particles.forEach((p) => {
+      p.draw()
+    })
+  }
+}
+
+let PARTICLE_RANGE_LENGTH = 0.3 // 0~n
+let PARTICLE_PG_OFFSET_SCALE = 0.2
+class Particle {
+	constructor({ streamIdx, idx, pgOffset, initX = width/2, initY = height/2 } = {}) {
+    // pgRange: pgOffset + [fixed range]
+    let pgRangeOffset = pgOffset * PARTICLE_PG_OFFSET_SCALE
+    // [start, end]
+    let pgRange = [
+      pgRangeOffset,
+      pgRangeOffset + PARTICLE_RANGE_LENGTH
+    ]
+    let offsetBase = 0 + streamIdx /10
+		let def = {
+      streamIdx,
+      idx,
+      pgRange,
 			initX,
       initY,
-      xOffsetRange: [random(0, 100), 20],
-      yOffsetRange: [random(0, 100), 20],
-      piRange: [0, 3.5*PI],
-      xScaleRange: [70, random(130, 170)],
-      yScaleRange: [70, random(130, 170)],
+      yOffsetRange: [offsetBase, offsetBase],
+      xOffsetRange: [offsetBase, offsetBase],
+      piRange: [0, 2*PI],
+      xScaleRange: [300, 300],
+      yScaleRange: [300, 300],
       clr: random(clrs),
 		}
-    // construct streaming cords
 		Object.assign(this, def)
 	}
-	
-	update() {}
-	
+
 	draw() {
     let {
+      streamIdx,
       idx,
-      pgOffset,
+      pgRange,
       initX,
       initY,
       piRange,
@@ -71,45 +115,59 @@ class Stream {
       yOffsetRange,
       clr,
     } = this
+    let selfPg = lerp(...pgRange, pg)
     let [piStart, piEnd] = piRange
     let [xScaleStart, xScaleEnd] = xScaleRange
     let [yScaleStart, yScaleEnd] = yScaleRange
-    let _pg = pgOffset + pg
     push()
-      let xDeg = map(_pg, 0, 1, piStart, piEnd, true)
-      let xScale = map(_pg, 0, 1, xScaleStart, xScaleEnd, true)
+      let noiseScale = 130
+      noiseScale = 900
+      let xDeg = map(selfPg, 0, 1, piStart, piEnd, true)
+      let xScale = map(selfPg, 0, 1, xScaleStart, xScaleEnd, true)
       let _x =
         cos(xDeg) * xScale +
-        (noise((1-pg)*5, idx) - 0.5) * 30
-      let xOffset = lerp(...xOffsetRange, pg)
-      let yOffset = lerp(...yOffsetRange, pg)
-      let yDeg = map(_pg, 0, 1, piStart, piEnd, true)
-      let yScale = map(_pg, 0, 1, yScaleStart, yScaleEnd, true)
-      let _y = sin(yDeg) * yScale
+        (noise((1-selfPg)*5/7, streamIdx * 0.1) - 0.5) * noiseScale
+      let yDeg = map(selfPg, 0, 1, piStart, piEnd, true)
+      let yScale = map(selfPg, 0, 1, yScaleStart, yScaleEnd, true)
+      let _y =
+        sin(yDeg) * yScale +
+        (noise((1-selfPg)*10/7, streamIdx * 0.1) - 0.5) * noiseScale
+      let xOffset = lerp(...xOffsetRange, selfPg)
+      let yOffset = lerp(...yOffsetRange, selfPg)
       let x = initX + xOffset + _x
       let y = initY + yOffset + _y
-      strokeWeight(0.3)
+      // strokeWeight(0.3)
       let strkClr = color(clr)
-      noStroke()
       // stroke(strkClr)
-      let clr1 = color("#f94144")
-      let clr2 = color("#011627")
-      let _clr = lerpColor(clr1, clr2, pg)
-      // let _clr = color(clr)
-      _clr.setAlpha(200)
-      fill(_clr)
-      let sz = lerp(8, 5, pg)
-      ellipse(x, y, sz)
+      noStroke()
+      push()
+        translate(x, y)
+        let clr1 = color("#f94144")
+        let clr2 = color("#011627")
+        let _clr = lerpColor(clr1, clr2, selfPg)
+        _clr.setAlpha(200)
+        fill(_clr)
+        rotate(xDeg + PI/2 * 0.9 + noise(yDeg/3+streamIdx/10)/3)
+        let w = 30 + noise(selfPg + streamIdx * 2) * 50
+        let h = lerp(4, 2, selfPg) + noise(xDeg, idx*3)*8
+        rectMode(CENTER)
+        rect(0, 0, w, h)
+        // ellipse(0, 0, h*2)
+      pop()
     pop()
 	}
 }
 
 export function draw() {
-  if (!DEVICE_MOTION_TOUCHED) {
+  // noLoop()
+	background(bg);
+  pg = PG
+  if (DEVICE_MOTION_SUPPORTED && !DEVICE_MOTION_TOUCHED) {
     return
+  } else {
+    // pg = map(mouseX, 0, width, 0, 1)
+    pg = map(cos(frameCount/50), -1, 1, 0, 1)
   }
-  // pg = map(cos(frameCount/100), -1, 1, 0, 1)
-  let clr = color("#E9967A")
 	streams.forEach(p => {
     p.draw()
   })

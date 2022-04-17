@@ -39,14 +39,15 @@
     <link rel="stylesheet" href="./style.css">
 
     <script>
-      let pg = 0
+      let PG = 0
       let DEVICE_MOTION_TOUCHED = false
+      let DEVICE_MOTION_SUPPORTED = false
       function deviceMotionHandler(evt) {
         if (!evt?.accelerationIncludingGravity) {
           return
         }
         let acc = evt.accelerationIncludingGravity
-        pg = map(acc.x, -5, 5, 0, 1, true)
+        PG = map(acc.x, -5, 5, 0, 1, true)
         DEVICE_MOTION_TOUCHED = true
       }
       function subscribeDeviceMotion() {
@@ -65,12 +66,20 @@
           alert(`DeviceMotion is not supported on this device 😢`);
         }
       }
+      ;(() => {
+        if (typeof DeviceMotionEvent.requestPermission === "function") {
+          let btn = document.createElement("button")
+          btn.onclick = subscribeDeviceMotion
+          document.body.prepend(btn)
+          DEVICE_MOTION_SUPPORTED = true
+        }
+      })();
     </script>
 
     <!-- if you need to import js scripts do it here -->
   </head>
   <body>
-    <button onclick="subscribeDeviceMotion()">enable device motion</button><br />
+    <!-- <button onclick="subscribeDeviceMotion()">enable device motion</button><br /> -->
     <!-- WEBPACK will inject the bundle.js here -->
   </body>
 </html>
