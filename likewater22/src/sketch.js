@@ -95,8 +95,8 @@ class Particle {
       yOffsetRange: [offsetBase, offsetBase],
       xOffsetRange: [offsetBase, offsetBase],
       piRange: [0, 4*PI],
-      xScaleRange: [200, 300],
-      yScaleRange: [200, 300],
+      xScaleRange: [250, 150],
+      yScaleRange: [250, 150],
       clr: random(clrs),
 		}
 		Object.assign(this, def)
@@ -122,17 +122,16 @@ class Particle {
     let [yScaleStart, yScaleEnd] = yScaleRange
     push()
       let noiseScale = 130
-      noiseScale = map(pg, 0, 1, 200, 800)
-      let xDeg = map(selfPg, 0, 1, piStart, piEnd, true)
+      noiseScale = map(pg, 0, 1, 400, 700)
+      let deg = map(selfPg, 0, 1, piStart, piEnd, true) + streamIdx/10
       let xScale = map(selfPg, 0, 1, xScaleStart, xScaleEnd, true)
       let _x =
-        cos(xDeg) * xScale +
-        (noise((1-selfPg)*5/5, streamIdx * 0.1) - 0.5) * noiseScale
-      let yDeg = map(selfPg, 0, 1, piStart, piEnd, true)
+        cos(deg) * xScale +
+        (noise((1-selfPg)*5/4, streamIdx * 0.1) - 0.5) * noiseScale
       let yScale = map(selfPg, 0, 1, yScaleStart, yScaleEnd, true)
       let _y =
-        sin(yDeg) * yScale +
-        (noise((1-selfPg)*10/5, streamIdx * 0.1) - 0.5) * noiseScale
+        sin(deg) * yScale +
+        (noise((1-selfPg)*10/4, streamIdx * 0.1) - 0.5) * noiseScale
       let xOffset = lerp(...xOffsetRange, selfPg)
       let yOffset = lerp(...yOffsetRange, selfPg)
       if (streamIdx === 0) {
@@ -151,9 +150,9 @@ class Particle {
         let _clr = lerpColor(clr1, clr2, selfPg)
         _clr.setAlpha(150)
         fill(_clr)
-        rotate(xDeg + PI/2 * 0.9 + noise(yDeg/3+streamIdx/10)/3)
-        let w = 30 + noise(selfPg + streamIdx * 2) * 50
-        let h = lerp(4, 2, selfPg) + noise(xDeg, idx*3)*8
+        rotate(deg + PI/2 * 0.9 + noise(deg/3+streamIdx/10)/3)
+        let w = 30 + noise(selfPg + streamIdx * 30) * 20
+        let h = lerp(4, 2, selfPg) + noise(deg, idx*3)*8
         rectMode(CENTER)
         rect(0, 0, w, h, 5)
         // ellipse(0, 0, h*2)
