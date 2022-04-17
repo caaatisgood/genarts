@@ -23,5 +23,8 @@ module.exports = {
       inject: "body",
       publicPath: "./"
     })
-  ]
+  ],
+  devServer: {
+    https: true
+  }
 }

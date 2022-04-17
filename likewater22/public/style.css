@@ -1,6 +1,14 @@
 html, body {
   background-color: black;
   overflow: hidden;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+main {
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

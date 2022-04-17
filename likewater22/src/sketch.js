@@ -1,118 +1,116 @@
+let clrStrs = [
+  "https://coolors.co/palette/355070-6d597a-b56576-e56b6f-eaac8b",
+]
+let clrs
 let cwidth = 700
 let cheight = cwidth
-
 let streams = []
-let pg = 0
+// let pg = 0
+// let deviceMotionHandler = (evt) => {
+//   if (!evt?.accelerationIncludingGravity) {
+//     return
+//   }
+//   let acc = evt.accelerationIncludingGravity
+//   pg = map(acc.x, -5, 5, 0, 1, true)
+// }
 
 export function setup() {
-  pixelDensity(3)
-  createCanvas(cwidth, cheight);
-	background("darksalmon");
-  let streamsAmt = 25
+  cheight = cwidth = min(windowWidth, windowHeight)
+  // createCanvas(cwidth, cheight);
+
+  createCanvas(windowWidth, windowHeight);
+	background("#edf6f9");
+  drawingContext.shadowBlur = 5;
+  // drawingContext.shadowColor = 'white';
+	// background(0);
+  clrs = random(clrStrs).split("/").pop().split("-").map(s => "#"+s)
+  let streamsAmt = 80
   for (let i = 0; i<streamsAmt; i++) {
     streams.push(
       new Stream({
         idx: i,
-        cv: createVector(
-          // random(-50, -20),
-          random(0, width),
-          map(i, 0, streamsAmt, height/10, height/10*9),
-        ),
+        // x: width/2 + noise(i*10, i) * map(noise(i/10, i), 0, 1, 0, 10),
+        // y: height/2 + noise(i*20, i) * map(noise(i/10, i), 0, 1, 0, 10),
+        initX: width/2 + sin(i/3)*20-30,
+        initY: height/2 + cos(i/2)*20-50,
       })
     )
   }
 }
 
 class Stream {
-	constructor({ cv, idx, x, y } = {}) {
-    let initX = x || 0
-    let initY = y || height/2
-    let _cv = cv || createVector(initX, initY)
+	constructor({ idx, initX = width/2, initY = height/2 } = {}) {
 		let def = {
       idx,
-			cv: _cv,
-      startv: _cv.copy(),
-      rot: 0,
-      speed: random(0.2, 0.5),
-      size: random([
-        [0.5, 3],
-        [3, 6],
-      ])
+      pgOffset: 0,
+			initX,
+      initY,
+      xOffsetRange: [random(0, 100), 20],
+      yOffsetRange: [random(0, 100), 20],
+      piRange: [0, 3.5*PI],
+      xScaleRange: [70, random(130, 170)],
+      yScaleRange: [70, random(130, 170)],
+      clr: random(clrs),
 		}
     // construct streaming cords
 		Object.assign(this, def)
 	}
 	
-	update() {
-    let { idx, cv, startv, speed } = this
-    /*
-      1. update next pos using noise
-         a. calc next pos/vector (using current pos?)
-         b. apply force/vector
-      2. update rotating angle - applied vector's heading()
-     */
-  
-    /* flowing based on progress */
-    let y_force_scale = 2
-    let nextNoise = noise(idx*2+pg) - 0.5
-    let yDelta = nextNoise * y_force_scale
-    let xDelta = speed * pg * width/(18+noise(frameCount/200+idx)*2)
-    let deltaVector = createVector(xDelta, yDelta)
-    let dvHeading = deltaVector.heading()
-    this.rot = dvHeading
-    cv.set([
-      startv.x + xDelta,
-      yDelta + cv.y
-    ])
-
-    /* flowing on it's own */
-    // let y_force_scale = 3
-    // let speed_scale = 2
-    // // interesting butterfly/dragonfly noise `cv.y`
-    // // let _nextNoise = noise(idx*20+frameCount/300, cv.y*100) - 0.5
-    // let _nextNoise = noise(idx/30+frameCount/100) - 0.5
-    // let nextNoise = _nextNoise*sin(idx/10+frameCount/100)
-    // let yDelta = nextNoise * y_force_scale
-    // let xDelta = speed + noise(idx+frameCount/100) * speed_scale
-    // let deltaVector = createVector(xDelta, yDelta)
-    // let dvHeading = deltaVector.heading()
-    // this.rot = dvHeading
-    // cv.add(deltaVector)
-
-    // boundary check
-    // if (cv.x > width) {
-    //   cv.set([0, cv.y])
-    // } else if (cv.x < 0) {
-    //   cv.set([width, cv.y])
-    // } else if (cv.y > height) {
-    //   cv.set([cv.x, 0])
-    // } else if (cv.y < 0) {
-    //   cv.set([cv.x, height])
-    // }
-	}
+	update() {}
 	
 	draw() {
-    let { cv, rot, size } = this
+    let {
+      idx,
+      pgOffset,
+      initX,
+      initY,
+      piRange,
+      xScaleRange,
+      yScaleRange,
+      xOffsetRange,
+      yOffsetRange,
+      clr,
+    } = this
+    let [piStart, piEnd] = piRange
+    let [xScaleStart, xScaleEnd] = xScaleRange
+    let [yScaleStart, yScaleEnd] = yScaleRange
+    let _pg = pgOffset + pg
     push()
-      translate(cv.x, cv.y)
-      rotate(frameCount/20+this.idx)
-      rotate(rot)
+      let xDeg = map(_pg, 0, 1, piStart, piEnd, true)
+      let xScale = map(_pg, 0, 1, xScaleStart, xScaleEnd, true)
+      let _x =
+        cos(xDeg) * xScale +
+        (noise((1-pg)*5, idx) - 0.5) * 30
+      let xOffset = lerp(...xOffsetRange, pg)
+      let yOffset = lerp(...yOffsetRange, pg)
+      let yDeg = map(_pg, 0, 1, piStart, piEnd, true)
+      let yScale = map(_pg, 0, 1, yScaleStart, yScaleEnd, true)
+      let _y = sin(yDeg) * yScale
+      let x = initX + xOffset + _x
+      let y = initY + yOffset + _y
+      strokeWeight(0.3)
+      let strkClr = color(clr)
       noStroke()
-      rectMode(CENTER)
-      let clr = color("white")
-      clr.setAlpha(100)
-      fill(clr)
-      let [rectW, rectH] = size
-      rect(0, 0, rectW, rectH, 10)
+      // stroke(strkClr)
+      let clr1 = color("#f94144")
+      let clr2 = color("#011627")
+      let _clr = lerpColor(clr1, clr2, pg)
+      // let _clr = color(clr)
+      _clr.setAlpha(200)
+      fill(_clr)
+      let sz = lerp(8, 5, pg)
+      ellipse(x, y, sz)
     pop()
 	}
 }
 
 export function draw() {
-  pg = map(sin(frameCount/30), -1, 1, 0, 1)
-	// background(10, 1);
+  if (!DEVICE_MOTION_TOUCHED) {
+    return
+  }
+  // pg = map(cos(frameCount/100), -1, 1, 0, 1)
+  let clr = color("#E9967A")
 	streams.forEach(p => {
-    p.update()
     p.draw()
   })
 }
@@ -121,5 +119,26 @@ export function mousePressed() {
   const dateTime = (
     new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
   ).split(" ").join("-")
-  save(`defnotlikewater22-${dateTime}`)
+  // save(`defnotlikewater22-${dateTime}`)
 }
+
+// const subscribeDeviceMotion = (handler) => {
+//   if (typeof DeviceMotionEvent.requestPermission === "function") {
+//     DeviceMotionEvent.requestPermission()
+//       .then((permissionState) => {
+//         alert(`> permissionState: ${permissionState}`);
+//         if (permissionState === "granted") {
+//           window.addEventListener("devicemotion", handler, true);
+//         }
+//       })
+//       .catch(err => {
+//         alert(err)
+//       });
+//   } else {
+//     alert(`DeviceMotion is not supported on this device 😢`);
+//   }
+// }
+
+// const unsubscribeDeviceMotion = (handler) => {
+//   window.removeEventListener("devicemotion", handler);
+// }

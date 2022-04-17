@@ -3,6 +3,7 @@
   <head>
     <title>likewater22</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script id="fxhash-snippet">
       //---- do not edit the following code (you can indent as you wish)
       let search = new URLSearchParams(window.location.search)
@@ -37,10 +38,39 @@
 
     <link rel="stylesheet" href="./style.css">
 
+    <script>
+      let pg = 0
+      let DEVICE_MOTION_TOUCHED = false
+      function deviceMotionHandler(evt) {
+        if (!evt?.accelerationIncludingGravity) {
+          return
+        }
+        let acc = evt.accelerationIncludingGravity
+        pg = map(acc.x, -5, 5, 0, 1, true)
+        DEVICE_MOTION_TOUCHED = true
+      }
+      function subscribeDeviceMotion() {
+        if (typeof DeviceMotionEvent.requestPermission === "function") {
+          DeviceMotionEvent.requestPermission()
+            .then((permissionState) => {
+              alert(`> permissionState: ${permissionState}`);
+              if (permissionState === "granted") {
+                window.addEventListener("devicemotion", deviceMotionHandler, true);
+              }
+            })
+            .catch(err => {
+              alert(err)
+            });
+        } else {
+          alert(`DeviceMotion is not supported on this device 😢`);
+        }
+      }
+    </script>
+
     <!-- if you need to import js scripts do it here -->
   </head>
   <body>
-
+    <button onclick="subscribeDeviceMotion()">enable device motion</button><br />
     <!-- WEBPACK will inject the bundle.js here -->
   </body>
 </html>
