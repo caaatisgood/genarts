@@ -1,29 +1,32 @@
-let clrStrs = [
-  "https://coolors.co/palette/355070-6d597a-b56576-e56b6f-eaac8b",
+let clrs = [
+  // [clr1, clr2, bg]
+  ["#f94144", "#011627", "#ccb7ae"],
+  // ["#31572c", "#00a8e8", "#edf6f9"],
+  // ["#d9ed92", "#db3a34", "#00171f"],
 ]
-let clrs
 let cwidth, cheight
 let particles = []
-let bg = "#edf6f9"
+let drawingScale
 
 export function setup() {
-  cwidth = min(windowWidth, windowHeight)
-  cheight = cwidth*0.7
+  pixelDensity(2)
+  cwidth = windowWidth
+  cheight = cwidth*0.61
+  drawingScale = cwidth / 2000
   createCanvas(cwidth, cheight);
+  let particlesAmt = 300
+  let [clr1, clr2, bg] = random(clrs)
 	background(bg);
-  clrs = random(clrStrs).split("/").pop().split("-").map(s => "#"+s)
-  let particlesAmt = 100
+  let _clr1 = color(clr1)
+  let _clr2 = color(clr2)
   for (let i = 0; i<particlesAmt; i++) {
-    let pg = i/(particlesAmt-1)
-    let clr1 = color("#f94144")
-    let clr2 = color("#011627")
-    let clr = lerpColor(clr1, clr2, pg)
-    // clr = color(random(clrs))
+    let ypg = random(0, 1)
+    let clr = lerpColor(_clr1, _clr2, ypg)
     particles.push(
       new Particle({
         idx: i,
-        initX: 0 - i * 1 - noise(i/100) * 2,
-        initY: lerp(0, height, pg) + noise(i) * 20,
+        initX: 0,
+        initY: ypg * height,
         clr,
       })
     )
@@ -38,18 +41,30 @@ class Particle {
       idx,
       currv,
       accv,
-      sz: 0,
+      w: 0,
+      h: 0,
+      rot: 0,
       clr,
+      flashy: random() < 0.66,
+      on: true,
     }
     Object.assign(this, def)
   }
   
   update() {
-    const {
-      idx,
-      currv,
-      accv,
-    } = this
+    if (this._isDone()) {
+      return
+    }
+
+    const { idx, currv, accv, flashy, on } = this
+    if (flashy && (frameCount % 3) === 0) {
+      if (on && random() > 0.6) {
+        this.on = false
+      } else if (!on && random() > 0.3) {
+        this.on = true
+      }
+    }
+
     if (currv.x > width) {
       currv.set([0, currv.y])
     } else if (currv.x < 0) {
@@ -60,52 +75,80 @@ class Particle {
       currv.set([currv.x, height])
     } else {
       let accX =
-        1 + sin((frameCount+idx)/40) +
-        noise(currv.x/10, sin((frameCount+idx*10)/50)) * 2
+        0.2 + sin((frameCount+idx)/40) +
+        noise(currv.x, sin((frameCount+idx*10)/50)) * 3.5
+      let overallNoise = ((frameCount % 20) === 0 ? floor(random(3, 5)) : 3) * 5
       let accY =
         sin((frameCount+idx)/30)*0.5 +
-        (noise(currv.y/2.5+currv.x/(50+idx*500), cos((frameCount+idx*100)/50)) - 0.5) * noise(frameCount/20)*50
-      let accXScale = 0.7
-      accv.set([accX*accXScale, accY])
+        (noise(currv.y/overallNoise+currv.x/(50+idx*500), cos((frameCount+idx*100)/50)*10) - 0.5) *
+        noise(frameCount/200)*30
+        // 1
+      let accXScale = 0.9
+      accv.set([
+        accX * accXScale * drawingScale,
+        accY * drawingScale
+      ])
       currv.add(accv)
-      let sz = 0.5 + noise(frameCount/30) * 2
-      this.sz = sz
+      this.w = (0.3 + noise(frameCount/30, idx/100) * 3.5) * drawingScale
+      this.h = noise((frameCount+idx*10)/30) * 10 * drawingScale
+      this.rot = sin((idx+currv.y)/30)*PI*2 + noise((idx+currv.y)/20)*PI*3
     }
   }
 
   draw() {
+    if (this._isDone()) {
+      return
+    }
+  
+    const { currv, clr, w, h, rot, on } = this
+    if (!on) {
+      return
+    }
     push()
-      const { idx, currv, clr } = this
-      translate(currv.x, currv.y)
+      let [x, y] = this._applyPadding(currv.x, currv.y)
+      translate(x, y)
       noStroke()
-      clr.setAlpha(150)
+      clr.setAlpha(40)
       fill(clr)
       rectMode(CENTER)
-      rotate((idx+currv.y)/100)
-      rect(0, 0, this.sz)
+      rotate(rot)
+      rect(0, 0, w, h)
     pop()
+  }
+
+  _isDone() {
+    return this.currv.x > width
+  }
+
+  _applyPadding(x, y) {
+    let wPadding = 0.075
+    let hPadding = 0.15
+    return [
+      width * wPadding + x * (1-wPadding*2),
+      height * hPadding + y * (1-hPadding*2),
+    ]
   }
 }
 
 export function draw() {
-  // noLoop()
-	// background(bg);
-  // pg = PG
   if (DEVICE_MOTION_SUPPORTED && !DEVICE_MOTION_TOUCHED) {
     return
-  } else {
-    // pg = map(mouseX, 0, width, 0, 1)
-    // pg = map(cos(frameCount/100), -1, 1, 0, 1)
   }
+  // scale(-1.0,1.0);
+  let isDone = true
 	particles.forEach(p => {
     p.update()
     p.draw()
+    isDone = isDone && p._isDone()
   })
+  if (isDone) {
+    noLoop()
+  }
 }
 
 export function mousePressed() {
   const dateTime = (
     new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
   ).split(" ").join("-")
-  // save(`defnotlikewater22-${dateTime}`)
+  save(`defnotlikewater22-${dateTime}`)
 }
