@@ -7,14 +7,19 @@ let clrs = [
 let cwidth, cheight
 let particles = []
 let drawingScale
+let mouseTouched = false
 
 export function setup() {
-  pixelDensity(2)
-  cwidth = windowWidth
-  cheight = cwidth*0.61
-  drawingScale = cwidth / 2000
+  randomSeed(10000)
+  noiseSeed(10000)
+  pixelDensity(4)
+  // cwidth = windowWidth
+  // cheight = cwidth*0.61
+  cheight = windowHeight
+  cwidth = cheight * 0.8
+  drawingScale = cheight / 1000
   createCanvas(cwidth, cheight);
-  let particlesAmt = 300
+  let particlesAmt = 200
   let [clr1, clr2, bg] = random(clrs)
 	background(bg);
   let _clr1 = color(clr1)
@@ -47,6 +52,7 @@ class Particle {
       clr,
       flashy: random() < 0.66,
       on: true,
+      overallNoise: 5,
     }
     Object.assign(this, def)
   }
@@ -74,23 +80,29 @@ class Particle {
     } else if (currv.y < 0) {
       currv.set([currv.x, height])
     } else {
+      let xBaseSpeed =
+        frameCount > 20 && mouseTouched
+          ? map(mouseX, 0, width, -0.5, 0.8)
+          : 0.2
       let accX =
-        0.2 + sin((frameCount+idx)/40) +
-        noise(currv.x, sin((frameCount+idx*10)/50)) * 3.5
-      let overallNoise = ((frameCount % 20) === 0 ? floor(random(3, 5)) : 3) * 5
+        xBaseSpeed + sin((frameCount+idx)/40)/2 +
+        noise(currv.x, sin((frameCount+idx*10)/50)) * 2
+      let overallNoise = this.overallNoise
+
+      let yWaviness = map((mouseY - height / 2)/height, -0.5, 0.5, -40, 40)
+      idx === 0 && console.log(yWaviness)
       let accY =
-        sin((frameCount+idx)/30)*0.5 +
-        (noise(currv.y/overallNoise+currv.x/(50+idx*500), cos((frameCount+idx*100)/50)*10) - 0.5) *
-        noise(frameCount/200)*30
-        // 1
-      let accXScale = 0.9
+        sin((frameCount+idx)/1)*0.5 +
+        (noise(currv.y/overallNoise+currv.x/(50+idx*100), cos((frameCount+idx*100)/50)*10) - 0.5) *
+        noise(frameCount/300)*yWaviness
+      let accXScale = 1.2
       accv.set([
         accX * accXScale * drawingScale,
         accY * drawingScale
       ])
       currv.add(accv)
-      this.w = (0.3 + noise(frameCount/30, idx/100) * 3.5) * drawingScale
-      this.h = noise((frameCount+idx*10)/30) * 10 * drawingScale
+      this.w = (0.3 + noise(frameCount/30, idx/100) * 3) * drawingScale
+      this.h = noise((frameCount+idx*10)/30) * 12 * drawingScale
       this.rot = sin((idx+currv.y)/30)*PI*2 + noise((idx+currv.y)/20)*PI*3
     }
   }
@@ -108,7 +120,7 @@ class Particle {
       let [x, y] = this._applyPadding(currv.x, currv.y)
       translate(x, y)
       noStroke()
-      clr.setAlpha(40)
+      clr.setAlpha(30)
       fill(clr)
       rectMode(CENTER)
       rotate(rot)
@@ -121,8 +133,8 @@ class Particle {
   }
 
   _applyPadding(x, y) {
-    let wPadding = 0.075
-    let hPadding = 0.15
+    let wPadding = 0.08
+    let hPadding = 0.05
     return [
       width * wPadding + x * (1-wPadding*2),
       height * hPadding + y * (1-hPadding*2),
@@ -131,6 +143,9 @@ class Particle {
 }
 
 export function draw() {
+  if (!mouseTouched && (mouseX !== 0 || mouseY !== 0)) {
+    mouseTouched = true
+  }
   if (DEVICE_MOTION_SUPPORTED && !DEVICE_MOTION_TOUCHED) {
     return
   }
@@ -144,11 +159,12 @@ export function draw() {
   if (isDone) {
     noLoop()
   }
+  // console.log(frameCount)
 }
 
 export function mousePressed() {
   const dateTime = (
     new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
   ).split(" ").join("-")
-  save(`defnotlikewater22-${dateTime}`)
+  // save(`defnotlikewater22-${dateTime}`)
 }
