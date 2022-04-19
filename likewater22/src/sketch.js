@@ -25,7 +25,7 @@ export function setup() {
     cwidth = windowWidth
     cheight = windowHeight / ASPECT_RATIO
   }
-  DRAWING_SCALE = cheight / 800
+  DRAWING_SCALE = cheight / 1000
   createCanvas(cwidth, cheight);
   let particlesAmt = 150
   let [clr1, clr2, bg, clrAlpha] = random(clrs)
