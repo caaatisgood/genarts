@@ -1,11 +1,11 @@
 let clrs = [
   // [clr1, clr2, bg, clrAlpha]
   // morning
-  ["#31572c", "#00a8e8", "#edf6f9", 30],
+  ["#31572c", "#00a8e8", "#edf6f9", 70],
   // sunset
   ["#e76f51", "#6d597a", "#ccb7ae", 50],
   // night
-  ["#d9ed92", "#db3a34", "#02040f", 30],
+  ["#d9ed92", "#db3a34", "#02040f", 40],
 ]
 let cwidth, cheight
 let particles = []
@@ -136,7 +136,7 @@ function setup(p5) {
   }
   DRAWING_SCALE = cheight / 1000
   p5.createCanvas(cwidth, cheight);
-  let particlesAmt = 150
+  let particlesAmt = 120
   let [clr1, clr2, bg, clrAlpha] = p5.random(clrs)
   CLR_ALPHA = clrAlpha
 	p5.background(bg);
@@ -181,7 +181,7 @@ const sketch = (p5) => {
     const dateTime = (
       new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
     ).split(" ").join("-")
-    // save(`defnotlikewater22-${dateTime}`)
+    // p5.save(`defnotlikewater22-${dateTime}`)
   }
 }
 
