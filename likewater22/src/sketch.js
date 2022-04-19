@@ -1,26 +1,35 @@
 let clrs = [
-  // [clr1, clr2, bg]
-  ["#f94144", "#011627", "#ccb7ae"],
-  // ["#31572c", "#00a8e8", "#edf6f9"],
-  // ["#d9ed92", "#db3a34", "#00171f"],
+  // [clr1, clr2, bg, clrAlpha]
+  // morning
+  ["#31572c", "#00a8e8", "#edf6f9", 30],
+  // sunset
+  ["#e76f51", "#6d597a", "#ccb7ae", 50],
+  // night
+  ["#d9ed92", "#db3a34", "#02040f", 30],
 ]
 let cwidth, cheight
 let particles = []
-let drawingScale
-let mouseTouched = false
+let DRAWING_SCALE
+let MOUSE_TOUCHED = false
+let CLR_ALPHA
 
 export function setup() {
-  randomSeed(10000)
-  noiseSeed(10000)
+  randomSeed(4222022)
+  noiseSeed(4222022)
   pixelDensity(4)
-  // cwidth = windowWidth
-  // cheight = cwidth*0.61
-  cheight = windowHeight
-  cwidth = cheight * 0.8
-  drawingScale = cheight / 1000
+  let ASPECT_RATIO = 0.77 // 0.77 : 1 (w:h)
+  if (windowWidth / windowHeight > ASPECT_RATIO) {
+    cheight = windowHeight
+    cwidth = cheight * ASPECT_RATIO
+  } else {
+    cwidth = windowWidth
+    cheight = windowHeight / ASPECT_RATIO
+  }
+  DRAWING_SCALE = cheight / 800
   createCanvas(cwidth, cheight);
-  let particlesAmt = 200
-  let [clr1, clr2, bg] = random(clrs)
+  let particlesAmt = 150
+  let [clr1, clr2, bg, clrAlpha] = random(clrs)
+  CLR_ALPHA = clrAlpha
 	background(bg);
   let _clr1 = color(clr1)
   let _clr2 = color(clr2)
@@ -52,7 +61,7 @@ class Particle {
       clr,
       flashy: random() < 0.66,
       on: true,
-      overallNoise: 5,
+      overallNoise: 12,
     }
     Object.assign(this, def)
   }
@@ -81,28 +90,30 @@ class Particle {
       currv.set([currv.x, height])
     } else {
       let xBaseSpeed =
-        frameCount > 20 && mouseTouched
-          ? map(mouseX, 0, width, -0.5, 0.8)
+        frameCount > 20 && MOUSE_TOUCHED
+          ? map(mouseX, 0, width, -0.5, 0.6)
           : 0.2
       let accX =
         xBaseSpeed + sin((frameCount+idx)/40)/2 +
         noise(currv.x, sin((frameCount+idx*10)/50)) * 2
       let overallNoise = this.overallNoise
 
-      let yWaviness = map((mouseY - height / 2)/height, -0.5, 0.5, -40, 40)
-      idx === 0 && console.log(yWaviness)
+      let yWaviness =
+        MOUSE_TOUCHED
+          ? map((mouseY - height / 2)/height, -0.5, 0.5, -40, 40)
+          : noise(frameCount/80) * 10
       let accY =
         sin((frameCount+idx)/1)*0.5 +
-        (noise(currv.y/overallNoise+currv.x/(50+idx*100), cos((frameCount+idx*100)/50)*10) - 0.5) *
+        (noise(currv.y/overallNoise+currv.x/(50+idx*200), cos((frameCount+idx*100)/50)*10) - 0.5) *
         noise(frameCount/300)*yWaviness
       let accXScale = 1.2
       accv.set([
-        accX * accXScale * drawingScale,
-        accY * drawingScale
+        accX * accXScale * DRAWING_SCALE,
+        accY * DRAWING_SCALE
       ])
       currv.add(accv)
-      this.w = (0.3 + noise(frameCount/30, idx/100) * 3) * drawingScale
-      this.h = noise((frameCount+idx*10)/30) * 12 * drawingScale
+      this.w = (0.3 + noise(frameCount/30, idx/100) * 3) * DRAWING_SCALE
+      this.h = noise((frameCount+idx*10)/30) * 12 * DRAWING_SCALE
       this.rot = sin((idx+currv.y)/30)*PI*2 + noise((idx+currv.y)/20)*PI*3
     }
   }
@@ -120,7 +131,7 @@ class Particle {
       let [x, y] = this._applyPadding(currv.x, currv.y)
       translate(x, y)
       noStroke()
-      clr.setAlpha(30)
+      clr.setAlpha(CLR_ALPHA)
       fill(clr)
       rectMode(CENTER)
       rotate(rot)
@@ -143,13 +154,12 @@ class Particle {
 }
 
 export function draw() {
-  if (!mouseTouched && (mouseX !== 0 || mouseY !== 0)) {
-    mouseTouched = true
+  if (!MOUSE_TOUCHED && (mouseX !== 0 || mouseY !== 0)) {
+    MOUSE_TOUCHED = true
   }
   if (DEVICE_MOTION_SUPPORTED && !DEVICE_MOTION_TOUCHED) {
     return
   }
-  // scale(-1.0,1.0);
   let isDone = true
 	particles.forEach(p => {
     p.update()
@@ -159,7 +169,6 @@ export function draw() {
   if (isDone) {
     noLoop()
   }
-  // console.log(frameCount)
 }
 
 export function mousePressed() {

@@ -70,7 +70,7 @@
         if (typeof DeviceMotionEvent.requestPermission === "function") {
           let btn = document.createElement("button")
           btn.onclick = subscribeDeviceMotion
-          document.body.prepend(btn)
+          document.body.append(btn)
           DEVICE_MOTION_SUPPORTED = true
         }
       })();
@@ -79,6 +79,10 @@
     <!-- if you need to import js scripts do it here -->
   </head>
   <body>
+    <!-- <div>
+      <p>Enable <b>“Device Motion”</b> to get the interactive experience</p>
+      <button>Enable</button>
+    </div> -->
     <!-- <button onclick="subscribeDeviceMotion()">enable device motion</button><br /> -->
     <!-- WEBPACK will inject the bundle.js here -->
   </body>

@@ -1,5 +1,5 @@
 html, body {
-  background-color: black;
+  background-color: white;
   overflow: hidden;
   text-align: center;
   display: flex;
@@ -7,6 +7,7 @@ html, body {
   justify-content: center;
   align-items: center;
   margin: 0;
+  font-family: georgia,serif;
 }
 main {
   width: 100%;
