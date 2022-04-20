@@ -34,8 +34,3 @@ if (typeof DeviceMotionEvent.requestPermission === "function") {
   // document.getElementById("dm-block").style.display = 'flex'
   // document.querySelector("#dm-block button").onclick = subscribeDeviceMotion
 }
-
-// 8 + 8 + 8
-// morning: 08 ~ 16
-// evening: 16 ~ 00
-//   night: 00 ~ 08

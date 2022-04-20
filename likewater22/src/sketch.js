@@ -14,7 +14,6 @@ let MOUSE_TOUCHED = false
 let CLR_ALPHA
 
 function setup(p5) {
-
   // define particle
   class Particle {
     constructor({ idx, initX, initY, clr } = {}) {
@@ -135,11 +134,21 @@ function setup(p5) {
     cheight = p5.windowHeight / ASPECT_RATIO
   }
   DRAWING_SCALE = cheight / 1000
-  p5.createCanvas(cwidth, cheight);
   let particlesAmt = 120
-  let [clr1, clr2, bg, clrAlpha] = p5.random(clrs)
+  // let [clr1, clr2, bg, clrAlpha] = p5.random(clrs)
+  let hour = new Date().getHours()
+  // 06 ~ 14 morning
+  // 14 ~ 22 evening
+  // 22 ~ 06 night
+  let [clr1, clr2, bg, clrAlpha] = 6 <= hour && hour < 14
+    ? clrs[0]
+    : 14 <= hour && hour < 22
+    ? clrs[1]
+    : clrs[2]
+  p5.createCanvas(cwidth, cheight);
+  p5.pixelDensity(4);
+  p5.background(bg);
   CLR_ALPHA = clrAlpha
-	p5.background(bg);
   let _clr1 = p5.color(clr1)
   let _clr2 = p5.color(clr2)
   for (let i = 0; i<particlesAmt; i++) {
@@ -179,9 +188,9 @@ const sketch = (p5) => {
   p5.draw = () => draw(p5)
   p5.mousePressed = () => {
     const dateTime = (
-      new Date().toDateString() + " " + new Date().toLocaleTimeString().replace(/\:/g, "")
-    ).split(" ").join("-")
-    // p5.save(`defnotlikewater22-${dateTime}`)
+      new Date().toISOString().substring(0, 10).replace(/\-/g, "") + "-" + new Date().toLocaleTimeString().replace(/\:/g, "-")
+    )
+    p5.save(`twiioh-${dateTime}`)
   }
 }
 
