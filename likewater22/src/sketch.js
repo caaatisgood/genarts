@@ -7,11 +7,11 @@ let clrs = [
   // night
   ["#d9ed92", "#db3a34", "#02040f", 40],
 ]
-let cwidth, cheight
 let particles = []
 let DRAWING_SCALE
 let MOUSE_TOUCHED = false
 let CLR_ALPHA
+let IS_DONE = false
 
 function setup(p5) {
   // define particle
@@ -57,18 +57,24 @@ function setup(p5) {
       } else if (currv.y < 0) {
         currv.set([currv.x, p5.height])
       } else {
+        let [xBaseSpeedStart, xBaseSpeedEnd] = [-0.5, 0.4]
         let xBaseSpeed =
-          p5.frameCount > 20 && MOUSE_TOUCHED
-            ? p5.map(p5.mouseX, 0, p5.width, -0.5, 0.6)
-            : 0.2
+        p5.frameCount > 15 && window.__devicemotion.enabled
+          ? p5.map(p5.rotationY, -50, 50, xBaseSpeedStart, xBaseSpeedEnd, true) // deg: -50~50
+          : MOUSE_TOUCHED
+          ? p5.map(p5.mouseX, 0, p5.width, xBaseSpeedStart, xBaseSpeedEnd, true)
+          : 0.2
         let accX =
           xBaseSpeed + p5.sin((p5.frameCount+idx)/40)/2 +
-          p5.noise(currv.x, p5.sin((p5.frameCount+idx*10)/50)) * 2
+          p5.noise(currv.x, p5.sin((p5.frameCount+idx*10)/50)) * 1.8
         let overallNoise = this.overallNoise
 
+        let [yWavinessStart, yWavinessEnd] = [-55, 55]
         let yWaviness =
-          MOUSE_TOUCHED
-            ? p5.map((p5.mouseY - p5.height / 2)/p5.height, -0.5, 0.5, -40, 40)
+          window.__devicemotion.enabled
+            ? p5.map(p5.rotationX, -45, 45, yWavinessStart, yWavinessEnd, true) // deg: -45~45
+            : MOUSE_TOUCHED
+            ? p5.map((p5.mouseY - p5.height / 2)/p5.height, -0.5, 0.5, yWavinessStart, yWavinessEnd, true)
             : p5.noise(p5.frameCount/80) * 10
         let accY =
           p5.sin((p5.frameCount+idx)/1)*0.5 +
@@ -104,7 +110,7 @@ function setup(p5) {
         p5.rectMode(p5.CENTER)
         p5.rotate(rot)
         p5.rect(0, 0, w, h)
-        p5.pop()
+      p5.pop()
     }
 
     _isDone() {
@@ -126,6 +132,7 @@ function setup(p5) {
   p5.noiseSeed(4222022)
   p5.pixelDensity(4)
   let ASPECT_RATIO = 0.77 // 0.77 : 1 (w:h)
+  let cwidth, cheight
   if (p5.windowWidth / p5.windowHeight > ASPECT_RATIO) {
     cheight = p5.windowHeight
     cwidth = cheight * ASPECT_RATIO
@@ -169,9 +176,6 @@ function draw(p5) {
   if (!MOUSE_TOUCHED && (p5.mouseX !== 0 || p5.mouseY !== 0)) {
     MOUSE_TOUCHED = true
   }
-  if (window.DEVICE_MOTION_SUPPORTED && !window.DEVICE_MOTION_TOUCHED) {
-    return
-  }
   let isDone = true
 	particles.forEach(p => {
     p.update()
@@ -179,18 +183,32 @@ function draw(p5) {
     isDone = isDone && p._isDone()
   })
   if (isDone) {
+    IS_DONE = true
     p5.noLoop()
   }
+  // debugging code
+  // p5.push()
+  //   p5.fill("white")
+  //   p5.rect(0, 0, 80, 60)
+  //   p5.fill("black")
+  //   p5.text(`${p5.rotationX}`, 0, 10)
+  //   p5.text(`${p5.radians(p5.rotationX)}`, 0, 20)
+  //   p5.text(`${p5.rotationY}`, 0, 40)
+  //   p5.text(`${p5.radians(p5.rotationY)}`, 0, 50)
+  // p5.pop()
 }
 
 const sketch = (p5) => {
   p5.setup = () => setup(p5)
   p5.draw = () => draw(p5)
   p5.mousePressed = () => {
+    if (!IS_DONE) {
+      return
+    }
     const dateTime = (
       new Date().toISOString().substring(0, 10).replace(/\-/g, "") + "-" + new Date().toLocaleTimeString().replace(/\:/g, "-")
     )
-    // p5.save(`world-in-our-hands-${dateTime}`)
+    p5.save(`world-in-our-hands-${dateTime}`)
   }
 }
 
