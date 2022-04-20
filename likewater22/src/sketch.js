@@ -66,7 +66,7 @@ function setup(p5) {
           : 0.2
         let accX =
           xBaseSpeed + p5.sin((p5.frameCount+idx)/40)/2 +
-          p5.noise(currv.x, p5.sin((p5.frameCount+idx*10)/50)) * 1.8
+          p5.noise(currv.x, p5.sin((p5.frameCount+idx*10)/50)) * 1.7
         let overallNoise = this.overallNoise
 
         let [yWavinessStart, yWavinessEnd] = [-55, 55]

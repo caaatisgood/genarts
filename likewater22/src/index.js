@@ -1,4 +1,5 @@
 import sketch from './sketch'
+
 function initSketch() {
   new p5(sketch)
 }
@@ -11,7 +12,6 @@ function subscribeDeviceMotion() {
   if (typeof DeviceMotionEvent.requestPermission === "function") {
     DeviceMotionEvent.requestPermission()
       .then((permissionState) => {
-        alert(`permissionState: ${permissionState}`)
         if (permissionState === "granted") {
           window.__devicemotion.enabled = true
         }
