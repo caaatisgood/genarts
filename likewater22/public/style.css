@@ -1,5 +1,5 @@
 html, body {
-  background-color: black;
+  background-color: white;
   overflow: hidden;
   text-align: center;
   display: flex;
@@ -16,4 +16,58 @@ main {
   align-items: center;
   margin: 0;
   padding: 0;
+}
+#dm-block {
+  padding: 12px;
+  text-shadow: -0.08em 0 red,  0.08em 0 cyan;
+  font-size: 16px;
+  color: black;
+}
+#dm-block button {
+  font-family: georgia,serif;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 4px 16px;
+  cursor: pointer;
+  font-size: inherit;
+}
+#dm-block button.later {
+  font-size: 12px;
+  color: #444;
+  border: none;
+  text-decoration: underline;
+}
+#dm-block button.enable {
+  transition: all 0.3s;
+  animation: neonBuzz 2.5s ease-in-out 0.5s infinite;
+  margin-bottom: 12px;
+}
+#dm-block button.enable:hover {
+  box-shadow: -0.3em 0.3em red,  0.3em -0.3em cyan;
+  transform: skewX(15deg);
+  animation: unset;
+}
+#dm-block button.enable:active {
+  box-shadow: -0.07em 0.07em red,  0.07em -0.07em cyan;
+  transform: skewX(15deg);
+  animation: unset;
+}
+@keyframes neonBuzz {
+  0% {
+    box-shadow: 0 0 red,  0 0 cyan;
+    text-shadow: 0 0 red,  0 0 cyan;
+  }
+  30% {
+    box-shadow: 0 0 red,  0 0 cyan;
+    transform: skewX(0);
+  }
+  65% {
+    box-shadow: -0.3em 0.3em red,  0.3em -0.3em cyan;
+    transform: skewX(15deg);
+  }
+  100% {
+    box-shadow: 0 0 red,  0 0 cyan;
+    transform: skewX(0);
+  }
 }

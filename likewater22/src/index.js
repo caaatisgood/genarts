@@ -1,5 +1,7 @@
 import sketch from './sketch'
-new p5(sketch)
+function initSketch() {
+  new p5(sketch)
+}
 
 window.DEVICE_MOTION_TOUCHED = false
 window.DEVICE_MOTION_SUPPORTED = false
@@ -16,7 +18,6 @@ function subscribeDeviceMotion() {
   if (typeof DeviceMotionEvent.requestPermission === "function") {
     DeviceMotionEvent.requestPermission()
       .then((permissionState) => {
-        alert(`> permissionState: ${permissionState}`);
         if (permissionState === "granted") {
           window.addEventListener("devicemotion", deviceMotionHandler, true);
         }
@@ -24,13 +25,22 @@ function subscribeDeviceMotion() {
       .catch(err => {
         alert(err)
       });
-  } else {
-    alert(`DeviceMotion is not supported on this device 😢`);
   }
 }
 
-if (typeof DeviceMotionEvent.requestPermission === "function") {
-  // window.DEVICE_MOTION_SUPPORTED = true
-  // document.getElementById("dm-block").style.display = 'flex'
-  // document.querySelector("#dm-block button").onclick = subscribeDeviceMotion
+const onSkipEnableDeviceMotion = () => {
+  document.getElementById("dm-block").style.display = 'none'
+  initSketch()
 }
+
+if (typeof DeviceMotionEvent.requestPermission === "function") {
+  window.DEVICE_MOTION_SUPPORTED = true
+  document.getElementById("dm-block").style.display = 'flex'
+  document.querySelector("#dm-block button.enable").onclick = subscribeDeviceMotion
+  document.querySelector("#dm-block button.later").onclick = onSkipEnableDeviceMotion
+} else {
+  initSketch()
+}
+
+// document.getElementById("dm-block").style.display = 'flex'
+// document.querySelector("#dm-block button.later").onclick = onSkipEnableDeviceMotion
