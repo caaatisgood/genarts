@@ -1,11 +1,11 @@
 let clrs = [
-  // [clr1, clr2, bg, clrAlpha]
+  // [clr1, clr2, bg, bgOfPageBody, clrAlpha]
   // morning
-  ["#31572c", "#00a8e8", "#edf6f9", 70],
+  ["#31572c", "#00a8e8", "#dfe7ea", "#edf6f9", 70],
   // sunset
-  ["#e76f51", "#6d597a", "#ccb7ae", 50],
+  ["#e76f51", "#6d597a", "#ccb7ae", "#d3c0b9", 50],
   // night
-  ["#d9ed92", "#db3a34", "#02040f", 40],
+  ["#d9ed92", "#db3a34", "#02040f", "#0A0C17", 40],
 ]
 let particles = []
 let DRAWING_SCALE
@@ -57,7 +57,7 @@ function setup(p5) {
       } else if (currv.y < 0) {
         currv.set([currv.x, p5.height])
       } else {
-        let [xBaseSpeedStart, xBaseSpeedEnd] = [-0.5, 0.4]
+        let [xBaseSpeedStart, xBaseSpeedEnd] = [-0.5, 0.5]
         let xBaseSpeed =
         p5.frameCount > 15 && window.__devicemotion.enabled
           ? p5.map(p5.rotationY, -50, 50, xBaseSpeedStart, xBaseSpeedEnd, true) // deg: -50~50
@@ -128,9 +128,8 @@ function setup(p5) {
   }
 
   // main setup
-  p5.randomSeed(4222022)
   p5.noiseSeed(4222022)
-  p5.pixelDensity(4)
+  p5.pixelDensity(5)
   let ASPECT_RATIO = 0.77 // 0.77 : 1 (w:h)
   let cwidth, cheight
   if (p5.windowWidth / p5.windowHeight > ASPECT_RATIO) {
@@ -142,16 +141,17 @@ function setup(p5) {
   }
   DRAWING_SCALE = cheight / 1000
   let particlesAmt = 120
-  // let [clr1, clr2, bg, clrAlpha] = p5.random(clrs)
+  // let [clr1, clr2, bg, bodyBg, clrAlpha] = p5.random(clrs)
   let hour = new Date().getHours()
   // 06 ~ 14 morning
   // 14 ~ 22 evening
   // 22 ~ 06 night
-  let [clr1, clr2, bg, clrAlpha] = 6 <= hour && hour < 14
+  let [clr1, clr2, bg, bodyBg, clrAlpha] = 6 <= hour && hour < 14
     ? clrs[0]
     : 14 <= hour && hour < 22
     ? clrs[1]
     : clrs[2]
+  document.body.style.backgroundColor = bodyBg
   p5.createCanvas(cwidth, cheight);
   p5.pixelDensity(4);
   p5.background(bg);
@@ -186,16 +186,6 @@ function draw(p5) {
     IS_DONE = true
     p5.noLoop()
   }
-  // debugging code
-  // p5.push()
-  //   p5.fill("white")
-  //   p5.rect(0, 0, 80, 60)
-  //   p5.fill("black")
-  //   p5.text(`${p5.rotationX}`, 0, 10)
-  //   p5.text(`${p5.radians(p5.rotationX)}`, 0, 20)
-  //   p5.text(`${p5.rotationY}`, 0, 40)
-  //   p5.text(`${p5.radians(p5.rotationY)}`, 0, 50)
-  // p5.pop()
 }
 
 const sketch = (p5) => {
