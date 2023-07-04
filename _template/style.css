@@ -1,0 +1,16 @@
+body {
+  /* reset */
+  margin: 0;
+  min-height: 100vh;
+  background-color: rgb(33, 33, 33);
+
+  /* canvas */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#canvasWrapper {
+  display: flex;
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+}
