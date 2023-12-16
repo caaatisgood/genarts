@@ -28,17 +28,21 @@ window.setup = function setup() {
   ybaseshift = h * 0.05
   xrepeat = floor(random([15, 30, 50, 60, 70, 80]))
   // xrepeat = 100
-  noLoop()
+  // noLoop()
+  r = random()
 }
 
 let ticks = 0
+let r
 
 window.draw = function draw() {
-  let randomY = noise(ticks/10) * hrange
+  let randomY = ticks * 7
+  // let randomY = (noise(ticks/20)) * hrange
   push()
     // translate(w/4, h/4+randomY)
     translate(xbaseshift, ybaseshift+randomY)
     let xLen = wrange / xrepeat
+    let strokeClr = random(["red", "yellow", "blue", "green"])
     for (let i = 0; i < xrepeat; i++) {
       let x = i * xLen
       let ydelta = (noise(ticks/5, i/5) - 0.5) * sin(i/1) * 75
@@ -47,12 +51,15 @@ window.draw = function draw() {
         fill("tomato")
         // ellipse(x, ydelta, 3)
       pop()
-      let xLenDelta = (noise(ticks/5, i/3) - 0.5) * (xLen * 1.66)
+      let xLenDelta = (noise(ticks/5, i/3) - 0.5) * (xLen * 1.66) * 0
       push()
         translate(x, ydelta)
-        rotate(PI * (noise(ticks/5, i/3) - 0.5) * 0.3)
+        rotate(PI * (noise(ticks/5, i/10) - 0.5) * 0.3)
         if (random() < 0.05) {
         } else {
+          if (random() > 0.8) {
+            stroke(strokeClr)
+          }
           line(0, 0, xLen + xLenDelta, 0)
           for (let j = 1; j < 5; j++) {
             if (random() > 0.95) {
@@ -63,6 +70,10 @@ window.draw = function draw() {
       pop()
     }
   pop()
+  if (ticks > 100) {
+    noLoop()
+  }
+  ticks++
 }
 
 window.mousePressed = () => {
@@ -77,6 +88,12 @@ window.mouseReleased = () => {
 window.windowResized = function windowResized() {
   const size = getSize()
   resizeCanvas(size, size);
+}
+
+window.keyPressed = function keyPressed() {
+  if (keyCode === 32) {
+    save(`punches1-${Date.now()}`)
+  }
 }
 
 const getSize = () => {
