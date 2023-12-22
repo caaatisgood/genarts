@@ -58,7 +58,7 @@ class Cell {
   }
 }
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 10; i++) {
   const wider = rand() > 0.9
   const cell = new Cell({
     x: rand(w*0.01, w*0.99),
@@ -92,3 +92,11 @@ function rand(a, b) {
   }
 }
 
+window.addEventListener("keypress", (evt) => {
+  if (evt.code === "Space") {
+    let link = document.createElement('a');
+    link.setAttribute('download', `the-gap-0-${Date.now()}.png`);
+    link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    link.click();
+  }
+})
