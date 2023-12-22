@@ -21,7 +21,9 @@ function setupCanvas(/** @type {HTMLCanvasElement} */ canvas) {
 
 const { ctx, canvas } = setupCanvas(document.getElementById("canvas1"));
 
-ctx.fillStyle = "#DFD6CC"
+// ctx.fillStyle = "#DFD6CC"
+ctx.fillStyle = "#FFE983"
+
 ctx.fillRect(0, 0, canvas.width, canvas.height)
 let w = canvas.width / dpr
 let h = canvas.height / dpr
@@ -48,9 +50,8 @@ class Cell {
       if (this.choppiness < Math.random()) {
         ctx.beginPath()
         ctx.rect(this.x, this.y, this.w, this.h)
-        ctx.fillStyle = "#000"
+        ctx.fillStyle = "#2E1E19"
         ctx.fill()
-        ctx.stroke()
       }
       this.y += this.speed
       requestAnimationFrame(this.update.bind(this))
@@ -58,16 +59,16 @@ class Cell {
   }
 }
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 7; i++) {
   const wider = rand() > 0.9
   const cell = new Cell({
     x: rand(w*0.01, w*0.99),
     y: 0,
     ...(wider ? {
       w: rand(12, 55),
-      choppiness: rand(0.1, 0.3),
+      choppiness: rand(0.2, 0.3),
     } : {
-      w: rand(0.05, 4),
+      w: rand(1, 6),
       choppiness: rand(0.3, 0.4),
     }),
   })
